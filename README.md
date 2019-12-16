@@ -1,4 +1,4 @@
-# Remote Script
+# PNG to MC Blocks Converter
 ## Overview
 This is a Python3 script that converts a PNG to Minecraft Blocks that match the texture the best. I made this program out of my need to recreate a PNG in Minecraft.
 
