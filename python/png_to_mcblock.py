@@ -2,7 +2,7 @@ import os
 from PIL import Image
 
 reference_png_name = "./Redstone Survivalist Skin.png"
-resource_pack_dir_path = "./1-14-4_block/"
+resource_pack_dir_path = "../1-14-4_block/"
 
 blocks = []
 resource_pack_dir = os.fsencode(resource_pack_dir_path)
