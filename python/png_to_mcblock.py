@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-reference_png_name = "./Redstone Survivalist Skin.png"
+reference_png_name = "../Redstone Survivalist Skin.png"
 resource_pack_dir_path = "../1-14-4_block/"
 
 blocks = []
