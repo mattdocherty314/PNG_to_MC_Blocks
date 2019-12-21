@@ -3,19 +3,35 @@ function pageLoad() {
     runButton.addEventListener("click", main);
 }
 
-function main() {
+async function main() {
     let output = document.getElementById("output");
 
-    const referencePNGName = "./Redstone Survivalist Skin.png";
-    const resourcePacDirPath = "../1-14-4_block";
-
-    let blocks = getListOfBlocks(resourcePacDirPath);
+    let blocks = await getListOfBlocks();
+    output.innerHTML = "Got list of blocks...<br/>";
+    let blockValues = await getAvgBlockValues(blocks);
+    output.innerHTML += "Got average values of blocks...<br/>";
+    let pngValues = await getPNGValues();
+    output.innerHTML += "Got values of PNG...<br/>";
 }
 
-function getListOfBlocks(directory) {
+async function getPNGValues() {
+    let pngValues = {};
+
+    await fetch("http://localhost:3061/Redstone Survivalist Skin")
+    .then((res) => {
+        return res.json();
+    })
+    .then((resJSON) => {
+        pngValues = resJSON
+    })
+
+    return pngValues;
+}
+
+async function getListOfBlocks() {
     let blockList = [];
 
-    fetch("http://localhost:3061/1-14-4_block")
+    await fetch("http://localhost:3061/1-14-4_block")
     .then((res) => {
         return res.json();
     })
@@ -28,6 +44,23 @@ function getListOfBlocks(directory) {
     })
 
     return blockList;
+}
+
+async function getAvgBlockValues(blocks) {
+    let avgVal = [];
+
+    
+    for (let b = 0; b < blocks.length; b++) {
+        fetch(`http://localhost:3061/${blocks[b]}`)
+        .then((res) => {
+            return res.json();
+        })
+        .then((resJSON) => {
+            avgVal.push(resJSON);
+        })
+    }
+
+    return avgVal;
 }
 
 /*
