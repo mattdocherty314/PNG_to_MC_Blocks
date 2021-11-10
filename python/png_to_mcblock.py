@@ -1,85 +1,140 @@
+import json
 import os
 from PIL import Image
 
-reference_png_name = "../Redstone Survivalist Skin.png"
-resource_pack_dir_path = "../1-14-4_block/"
+# Main function
+def main():
+	reference_png_name = "../Redstone Survivalist Skin.png"
+	resource_pack_dir_path = "../1-14-4_block/"
+	results_filename = "results.json"
 
-blocks = []
-resource_pack_dir = os.fsencode(resource_pack_dir_path)
-for res_file in os.listdir(resource_pack_dir):
-    res_name = os.fsdecode(res_file)
-    if (res_name.endswith(".png")):
-        blocks.append(res_name[:-4])
+	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
+	blocks = get_block_list(resource_pack_dir_path)
 
-ref_png = Image.open(reference_png_name, 'r')
-ref_png_pix_rgb = list(ref_png.getdata())
-ref_png_w, ref_png_h = ref_png.size
-ref_png.close()
+	ref_count = 0
+	results = {}
 
-coordinates = []
-ref_png_res_match = {}
-ref_pix_count = 0
-for ref_pix in ref_png_pix_rgb:
-    x = ref_pix_count % ref_png_w
-    y = ref_pix_count // ref_png_w
-    
-    if (ref_pix[3] != 0):
-        ref_png_res_match[ref_pix_count] = {}
-        for block in blocks:
-            block_png = Image.open(resource_pack_dir_path+block+".png", 'r')
-            block_png_pix_rgb = list(block_png.getdata())
-            block_png_w, block_png_h = block_png.size
-            block_png_area = block_png_w * block_png_h
-            block_png.close()
-            
-            avg_block_r = 0
-            avg_block_g = 0
-            avg_block_b = 0
-            avg_block_a = 0
-            for block_pix in block_png_pix_rgb:
-                try:
-                    avg_block_r += block_pix[0] / block_png_area
-                    avg_block_g += block_pix[1] / block_png_area
-                    avg_block_b += block_pix[2] / block_png_area
-                    avg_block_a += block_pix[3] / block_png_area
-                except TypeError:
-                    avg_block_r = 0
-                    avg_block_g = 0
-                    avg_block_b = 0
-                    avg_block_a = 0
-                except IndexError:
-                    avg_block_r = 0
-                    avg_block_g = 0
-                    avg_block_b = 0
-                    avg_block_a = 0
+	for ref_pix in ref_rgb: # For every pixel
+		x = ref_count % ref_w # Get the X position
+		y = ref_count // ref_w # Get the Y position
 
-            pix_diff_r = abs(avg_block_r - ref_pix[0])/255
-            pix_diff_g = abs(avg_block_g - ref_pix[1])/255
-            pix_diff_b = abs(avg_block_b - ref_pix[2])/255
-            pix_diff_a = abs(avg_block_a - ref_pix[3])/255
+		list_matches = find_matches(resource_pack_dir_path, blocks, ref_pix, x, y)
+		results[f"({x},{y})"] = list_matches
 
-            pix_diff_overall = 1 - (pix_diff_r+pix_diff_g+pix_diff_b+pix_diff_a) / 4
-            ref_png_res_match[ref_pix_count][block] = pix_diff_overall
+		ref_count += 1
+	
+	sort_res = sort_results(results, 10)
+	save_results(results_filename, sort_res)
 
-        coordinates.append("("+str(x)+", "+str(y)+")")
-    print("Completed ("+str(x)+", "+str(y)+")!")
-    
-    ref_pix_count += 1
+# Function that finds the error between the block and the pixel
+def find_error(block_col, pixel_col):
+	diff_r = abs(block_col[0] - pixel_col[0])/255 # red
+	diff_g = abs(block_col[1] - pixel_col[1])/255 # green
+	diff_b = abs(block_col[2] - pixel_col[2])/255 # blue
+	diff_a = abs(block_col[3] - pixel_col[3])/255 # alpha
+
+	diff_overall = 1 - (diff_r+diff_g+diff_b+diff_a) / 4
+
+	return diff_overall
+
+# Function to give a similarity score to all blocks (from 0 to 1)
+def find_matches(block_dir, list_blocks, pixel, x, y):
+	matches = {}
+
+	if (pixel[3] == 0): # If pixel is completely transparent
+		return
+
+	for block in list_blocks: # Go through all the blocks
+		block_rgb, block_area = get_block_data(f"{block_dir}{block}.png")
+		block_r, block_g, block_b, block_a = get_average_block_colour(block_rgb, block_area)
+
+		error = find_error([block_r, block_g, block_b, block_a], pixel)
+		matches[block] = error
+	
+	print(f"Completed ({x}, {y})!")
+	
+	return matches
+
+# Function to average the colour of the block
+def get_average_block_colour(block_rgb, block_area):
+	avg_r = 0
+	avg_g = 0
+	avg_b = 0
+	avg_a = 0
+
+	for block_pix in block_rgb:
+		try:
+			avg_r += block_pix[0] / block_area # red
+			avg_g += block_pix[1] / block_area # green
+			avg_b += block_pix[2] / block_area # blue
+			avg_a += block_pix[3] / block_area # alpha
+		except IndexError:
+			avg_r += 0
+			avg_g += 0
+			avg_b += 0
+			avg_a += 0
+		except TypeError:
+			avg_r += 0
+			avg_g += 0
+			avg_b += 0
+			avg_a += 0
+
+	
+	return avg_r, avg_g, avg_b, avg_a
+
+# Function to get a list of valid blocks
+def get_block_list(blocks_path):
+	blocks = []
+	resource_pack_dir = os.fsencode(blocks_path)
+
+	for res_file in os.listdir(blocks_path): #List the files in the directory
+		res_name = os.fsdecode(res_file)
+		if (res_name.endswith(".png")): # If it is a texture file
+			blocks.append(res_name[:-4])
+	
+	return blocks
+
+# Function to get all the block texture data
+def get_block_data(block_file):
+	block_png = Image.open(block_file, 'r')
+	block_png_rgb = list(block_png.getdata())
+	block_w, block_h = block_png.size
+	block_area = block_w * block_h
+	block_png.close()
+
+	return block_png_rgb, block_area
+
+# Function to get the data associated with the reference image
+def get_ref_data(ref_name):
+	ref_png = Image.open(ref_name, 'r')
+	ref_png_pix_rgb = list(ref_png.getdata())
+	ref_png_w, ref_png_h = ref_png.size
+	ref_png.close()
+
+	return ref_png_pix_rgb, ref_png_w, ref_png_h
+
+# Function to save the results to a JSON file
+def save_results(name, results):
+	with open(f"{name}", 'w') as results_file:
+		json.dump(results, results_file, indent=2)
+
+# Function to sort the results and limit them
+def sort_results(results, limit_count):
+	save_results = {}
+	new_results = {}
+	for idx, res in enumerate(results):
+		if (results[res] == None):
+			continue
+		new_results[res] = dict((sorted(results[res].items(), key=lambda x: x[1], reverse=True))) # sort the results
+		save_results[res] = {}
+		for idx2, res2 in enumerate(new_results[res]):
+			if (idx2 >= limit_count):
+				break
+			save_results[res][res2] = new_results[res][res2] # limit the results
+
+	return save_results
 
 
-results_filename = "./top20_results.txt"
-results_file = open(results_filename, 'w')
-ref_pix_count = 0
 
-for ref_pix in ref_png_res_match:
-    results_file.write(str(coordinates[ref_pix_count])+"\n")
-    ref_png_res_chance_sort = sorted(ref_png_res_match[ref_pix].values(), reverse=True)[:20]
-    for chance in ref_png_res_chance_sort:
-        for match in ref_png_res_match[ref_pix]:
-            if (ref_png_res_match[ref_pix][match] == chance):
-                results_file.write(str(match) + ": "+ str(chance)+"\n")
-                break
-
-    results_file.write("\n")
-    ref_pix_count += 1
-results_file.close()
+if __name__ == "__main__":
+	main()
