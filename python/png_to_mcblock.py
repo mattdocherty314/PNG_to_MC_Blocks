@@ -5,7 +5,7 @@ from PIL import Image
 # Main function
 def main():
 	reference_png_name = "../Redstone Survivalist Skin.png"
-	resource_pack_dir_path = "../1-14-4_block/"
+	resource_pack_dir_path = "../1-17-1_blocks/"
 	results_filename = "results.json"
 
 	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
