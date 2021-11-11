@@ -16,12 +16,16 @@ To change the blocks or the .png selected available you will need to change it i
 ### v1.0.0
 * Finished base version
 
+### v1.1.0
+* Modularised code
+* Added configuration file
+* Added user input
+* Updated textures to 1.17.1
+
 ## TODO
-* Configuration settings
 * Argument parsing
-* Read valid texture list from file
-* Better code comments
 * Error catching
-* Use of multiprocessing
 * Good enough search (take a threshold and first N that meet it)
+* Whitelist & Blacklist of textures
 * GUI
+* Use of multiprocessing

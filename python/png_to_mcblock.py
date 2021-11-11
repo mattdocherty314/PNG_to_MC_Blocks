@@ -4,9 +4,23 @@ from PIL import Image
 
 # Main function
 def main():
-	reference_png_name = "../Redstone Survivalist Skin.png"
-	resource_pack_dir_path = "../1-17-1_blocks/"
-	results_filename = "results.json"
+	read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
+	if (read_config in ["No", "NO", "no", "n", "N"]): # Go into prompting user for questions
+		reference_png_name = input("What is the image you want to copy (*'../Redstone Survivalist Skin.png')? ")
+		reference_png_name = valid_ref_png(reference_png_name)
+		resource_pack_dir_path = input("What is the directory of block textures (*'../1-17-1_blocks/')? ")
+		resource_pack_dir_path = valid_dir_name(resource_pack_dir_path)
+		results_filename = input("Where do you want to store the results (*'./results.json')? ")
+		results_filename = valid_res_json(results_filename)
+		top_n = input("How many of the top results do you want to store (*'10')? ")
+		top_n = valid_top_n(top_n)
+	else:
+		print("Reading configuration file")
+		config = load_config()
+		reference_png_name = config['ref_png_name']
+		resource_pack_dir_path = config['pack_dir_path']
+		results_filename = config['res_filename']
+		top_n = config['top_n_results']
 
 	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
 	blocks = get_block_list(resource_pack_dir_path)
@@ -23,7 +37,7 @@ def main():
 
 		ref_count += 1
 	
-	sort_res = sort_results(results, 10)
+	sort_res = sort_results(results, top_n)
 	save_results(results_filename, sort_res)
 
 # Function that finds the error between the block and the pixel
@@ -113,6 +127,13 @@ def get_ref_data(ref_name):
 
 	return ref_png_pix_rgb, ref_png_w, ref_png_h
 
+# Function to load the configuration from the config file
+def load_config(name="config.json"):
+	with open(name, 'r') as config_file:
+		config = json.load(config_file)
+	
+	return config
+
 # Function to save the results to a JSON file
 def save_results(name, results):
 	with open(f"{name}", 'w') as results_file:
@@ -133,6 +154,38 @@ def sort_results(results, limit_count):
 			save_results[res][res2] = new_results[res][res2] # limit the results
 
 	return save_results
+
+# Function that checks if the directory name is valid
+def valid_dir_name(name):
+	if (not name.endswith("/")):
+		print("Must end in '/'; Defaulting to '../1-17-1_blocks/'")
+		return "../1-17-1_blocks/"
+	
+	return name
+
+# Function that checks if the reference PNG name is valid
+def valid_ref_png(name):
+	if (not name.endswith(".png")):
+		print("Must end in '.png'; Defaulting to '../Redstone Survivalist Skin.png'")
+		return "../Redstone Survivalist Skin.png"
+	
+	return name
+
+# Function that checks if the results filename is valid
+def valid_res_json(name):
+	if (not name.endswith(".json")):
+		print("Must end in '.json'; Defaulting to './results.json'")
+		return "./results.json"
+	
+	return name
+
+# Function that checks if the top N is valid
+def valid_top_n(name):
+	if (not name.isnumeric()):
+		print("Not a number; Defaulting to '10'")
+		return 10
+	
+	return int(name)
 
 
 
