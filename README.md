@@ -21,9 +21,9 @@ To change the blocks or the .png selected available you will need to change it i
 * Added configuration file
 * Added user input
 * Updated textures to 1.17.1
+* Added argument parsing
 
 ## TODO
-* Argument parsing
 * Error catching
 * Good enough search (take a threshold and first N that meet it)
 * Whitelist & Blacklist of textures
