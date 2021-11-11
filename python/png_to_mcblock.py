@@ -1,21 +1,46 @@
 import json
 import os
 from PIL import Image
+import sys
 
 # Main function
 def main():
-	read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
+	args = read_args()
+	
+	read_config = "n"
+	if (args["--config"] == True):
+		read_config = "y"
+	elif (args["--prompt"] == True):
+		read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
+	
 	if (read_config in ["No", "NO", "no", "n", "N"]): # Go into prompting user for questions
-		reference_png_name = input("What is the image you want to copy (*'../Redstone Survivalist Skin.png')? ")
-		reference_png_name = valid_ref_png(reference_png_name)
-		resource_pack_dir_path = input("What is the directory of block textures (*'../1-17-1_blocks/')? ")
-		resource_pack_dir_path = valid_dir_name(resource_pack_dir_path)
-		results_filename = input("Where do you want to store the results (*'./results.json')? ")
-		results_filename = valid_res_json(results_filename)
-		top_n = input("How many of the top results do you want to store (*'10')? ")
-		top_n = valid_top_n(top_n)
+		print("Using argument values over prompting.")
+		if (args["-r"] == False): # If arg wasn't given
+			reference_png_name = input("What is the image you want to copy (*'../Redstone Survivalist Skin.png')? ")
+			reference_png_name = valid_ref_png(reference_png_name)
+		else:
+			reference_png_name = valid_ref_png(args["-r"])
+
+		if (args["-b"] == False): # If arg wasn't given
+			resource_pack_dir_path = input("What is the directory of block textures (*'../1-17-1_blocks/')? ")
+			resource_pack_dir_path = valid_dir_name(resource_pack_dir_path)
+		else:
+			resource_pack_dir_path = valid_dir_name(args["-b"])
+
+		if (args["-o"] == False): # If arg wasn't given
+			results_filename = input("Where do you want to store the results (*'./results.json')? ")
+			results_filename = valid_res_json(results_filename)
+		else:
+			results_filename = valid_res_json(args["-o"])
+
+		if (args["-l"] == False): # If arg wasn't given
+			top_n = input("How many of the top results do you want to store (*'10')? ")
+			top_n = valid_top_n(top_n)
+		else:
+			top_n = valid_top_n(args["-l"])
+			
 	else:
-		print("Reading configuration file")
+		print("Reading configuration file. Using them over any arguments.")
 		config = load_config()
 		reference_png_name = config['ref_png_name']
 		resource_pack_dir_path = config['pack_dir_path']
@@ -133,6 +158,39 @@ def load_config(name="config.json"):
 		config = json.load(config_file)
 	
 	return config
+
+# Function responsible for reading args
+def read_args():
+	args = {
+		'-r': False, # Reference PNG
+		'-b': False, # Texture Dir
+		'-o': False, # Output JSON
+		'-l': False, # Limit Output
+		'--config': False, # Use Config
+		'--prompt': False, # Prompt User
+	}
+	if (len(sys.argv) == 1):
+		return None
+
+	elif ((len(sys.argv) == 2) and (sys.argv[1] in ["-h", "-?", "--help"])):
+		print("Usage:")
+		print("''		= Manual Input")
+		print("'-h'		= Help")
+		print("'-r <file>'	= Reference PNG")
+		print("'-b <dir>'	= Texture Directory")
+		print("'-o <file>'	= Output JSON")
+		print("'-l <num>'	= Limit Output")
+		print("'--config'	= Use Configuration")
+		print("'--prompt'	= Prompt User")
+
+	else:
+		for i in range(1, len(sys.argv)):
+			if ((i+1 <= len(sys.argv)-1) and (sys.argv[i] in ['-r', '-b', '-o', '-l'])):
+				args[sys.argv[i]] = sys.argv[i+1]
+			elif (sys.argv[i] in ['--config', '--prompt']):
+				args[sys.argv[i]] = True
+
+	return args
 
 # Function to save the results to a JSON file
 def save_results(name, results):
