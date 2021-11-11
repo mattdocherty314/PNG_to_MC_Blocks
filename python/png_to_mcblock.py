@@ -38,7 +38,7 @@ def main():
 			top_n = valid_top_n(top_n)
 		else:
 			top_n = valid_top_n(args["-l"])
-			
+
 	else:
 		print("Reading configuration file. Using them over any arguments.")
 		config = load_config()
@@ -123,15 +123,19 @@ def get_average_block_colour(block_rgb, block_area):
 
 # Function to get a list of valid blocks
 def get_block_list(blocks_path):
-	blocks = []
-	resource_pack_dir = os.fsencode(blocks_path)
+	try:
+		blocks = []
+		resource_pack_dir = os.fsencode(blocks_path)
 
-	for res_file in os.listdir(blocks_path): #List the files in the directory
-		res_name = os.fsdecode(res_file)
-		if (res_name.endswith(".png")): # If it is a texture file
-			blocks.append(res_name[:-4])
-	
-	return blocks
+		for res_file in os.listdir(blocks_path): #List the files in the directory
+			res_name = os.fsdecode(res_file)
+			if (res_name.endswith(".png")): # If it is a texture file
+				blocks.append(res_name[:-4])
+		
+		return blocks
+	except FileNotFoundError:
+		print("No block texture directory found! Exiting...")
+		sys.exit(1)
 
 # Function to get all the block texture data
 def get_block_data(block_file):
@@ -141,16 +145,20 @@ def get_block_data(block_file):
 	block_area = block_w * block_h
 	block_png.close()
 
-	return block_png_rgb, block_area
+	return block_png_rgb, block_area	
 
 # Function to get the data associated with the reference image
 def get_ref_data(ref_name):
-	ref_png = Image.open(ref_name, 'r')
-	ref_png_pix_rgb = list(ref_png.getdata())
-	ref_png_w, ref_png_h = ref_png.size
-	ref_png.close()
+	try:
+		ref_png = Image.open(ref_name, 'r')
+		ref_png_pix_rgb = list(ref_png.getdata())
+		ref_png_w, ref_png_h = ref_png.size
+		ref_png.close()
 
-	return ref_png_pix_rgb, ref_png_w, ref_png_h
+		return ref_png_pix_rgb, ref_png_w, ref_png_h
+	except FileNotFoundError:
+		print("No reference PNG found! Exiting...")
+		sys.exit(1)
 
 # Function to load the configuration from the config file
 def load_config(name="config.json"):
