@@ -18,25 +18,25 @@ def main():
 	
 	if (read_config in ["No", "NO", "no", "n", "N"]): # Go into prompting user for questions
 		print("Using argument values over prompting.")
-		if (args["-r"] == False): # If arg wasn't given
+		if (args == None) or (args["-r"] == False): # If arg wasn't given
 			reference_png_name = input("What is the image you want to copy (*'../Redstone Survivalist Skin.png')? ")
 			reference_png_name = valid_ref_png(reference_png_name)
 		else:
 			reference_png_name = valid_ref_png(args["-r"])
 
-		if (args["-b"] == False): # If arg wasn't given
+		if (args == None) or (args["-b"] == False): # If arg wasn't given
 			resource_pack_dir_path = input("What is the directory of block textures (*'../1-17-1_blocks/')? ")
 			resource_pack_dir_path = valid_dir_name(resource_pack_dir_path)
 		else:
 			resource_pack_dir_path = valid_dir_name(args["-b"])
 
-		if (args["-o"] == False): # If arg wasn't given
+		if (args == None) or (args["-o"] == False): # If arg wasn't given
 			results_filename = input("Where do you want to store the results (*'./results.json')? ")
 			results_filename = valid_res_json(results_filename)
 		else:
 			results_filename = valid_res_json(args["-o"])
 
-		if (args["-l"] == False): # If arg wasn't given
+		if (args == None) or (args["-l"] == False): # If arg wasn't given
 			top_n = input("How many of the top results do you want to store (*'10')? ")
 			top_n = valid_top_n(top_n)
 		else:
