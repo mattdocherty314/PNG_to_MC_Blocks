@@ -2,13 +2,16 @@ import json
 import os
 from PIL import Image
 import sys
+import time
 
 # Main function
 def main():
 	args = read_args()
 	
 	read_config = "n"
-	if (args["--config"] == True):
+	if (args == None):
+		read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
+	elif (args["--config"] == True):
 		read_config = "y"
 	elif (args["--prompt"] == True):
 		read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
@@ -49,6 +52,7 @@ def main():
 
 	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
 	blocks = get_block_list(resource_pack_dir_path)
+	block_cols = find_block_colours(resource_pack_dir_path, blocks)
 
 	ref_count = 0
 	results = {}
@@ -57,13 +61,29 @@ def main():
 		x = ref_count % ref_w # Get the X position
 		y = ref_count // ref_w # Get the Y position
 
-		list_matches = find_matches(resource_pack_dir_path, blocks, ref_pix, x, y)
+		list_matches = find_matches(block_cols, ref_pix, x, y)
 		results[f"({x},{y})"] = list_matches
 
 		ref_count += 1
 	
 	sort_res = sort_results(results, top_n)
 	save_results(results_filename, sort_res)
+
+# Function that saves the block colours to a dictionary
+def find_block_colours(block_dir, list_blocks):
+	block_cols = {}
+	for block in list_blocks: # Go through all the blocks
+		block_rgb, block_area = get_block_data(f"{block_dir}{block}.png")
+		block_r, block_g, block_b, block_a = get_average_block_colour(block_rgb, block_area)
+		block_cols[block] = {
+			'r': block_r,
+			'g': block_g,
+			'b': block_b,
+			'a': block_a
+		}
+
+	return block_cols
+
 
 # Function that finds the error between the block and the pixel
 def find_error(block_col, pixel_col):
@@ -77,20 +97,16 @@ def find_error(block_col, pixel_col):
 	return diff_overall
 
 # Function to give a similarity score to all blocks (from 0 to 1)
-def find_matches(block_dir, list_blocks, pixel, x, y):
+def find_matches(block_rgba, pixel_col, x, y):
 	matches = {}
 
-	if (pixel[3] == 0): # If pixel is completely transparent
+	if (pixel_col[3] == 0): # If pixel is completely transparent
 		return
 
-	for block in list_blocks: # Go through all the blocks
-		block_rgb, block_area = get_block_data(f"{block_dir}{block}.png")
-		block_r, block_g, block_b, block_a = get_average_block_colour(block_rgb, block_area)
-
-		error = find_error([block_r, block_g, block_b, block_a], pixel)
+	for block in block_rgba: # Go through all the blocks
+		block_col = [block_rgba[block]['r'], block_rgba[block]['g'], block_rgba[block]['b'], block_rgba[block]['a']]
+		error = find_error(block_col, pixel_col)
 		matches[block] = error
-	
-	print(f"Completed ({x}, {y})!")
 	
 	return matches
 

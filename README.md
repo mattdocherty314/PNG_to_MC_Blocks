@@ -24,8 +24,9 @@ To change the blocks or the .png selected available you will need to change it i
 * Added argument parsing
 * Error catching for invalid directory or reference PNG name
 
+### v1.2.0
+* Improved algorithm speed
+
 ## TODO
-* Good enough search (take a threshold and first N that meet it)
 * Whitelist & Blacklist of textures
 * GUI
-* Use of multiprocessing
