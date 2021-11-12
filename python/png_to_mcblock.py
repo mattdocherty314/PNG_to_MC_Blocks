@@ -50,9 +50,12 @@ def main():
 		results_filename = config['res_filename']
 		top_n = config['top_n_results']
 
+	whitelist = load_whitelist("whitelist.txt")
+	blacklist = load_blacklist("blacklist.txt")
+
 	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
 	blocks = get_block_list(resource_pack_dir_path)
-	block_cols = find_block_colours(resource_pack_dir_path, blocks)
+	block_cols = find_block_colours(resource_pack_dir_path, blocks, whitelist, blacklist)
 
 	ref_count = 0
 	results = {}
@@ -70,9 +73,13 @@ def main():
 	save_results(results_filename, sort_res)
 
 # Function that saves the block colours to a dictionary
-def find_block_colours(block_dir, list_blocks):
+def find_block_colours(block_dir, list_blocks, whitelist, blacklist):
 	block_cols = {}
 	for block in list_blocks: # Go through all the blocks
+		if ((whitelist != []) and (block not in whitelist)):
+			continue
+		if (block in blacklist):
+			continue
 		block_rgb, block_area = get_block_data(f"{block_dir}{block}.png")
 		block_r, block_g, block_b, block_a = get_average_block_colour(block_rgb, block_area)
 		block_cols[block] = {
@@ -182,6 +189,20 @@ def load_config(name="config.json"):
 		config = json.load(config_file)
 	
 	return config
+
+# Function that loads the whitelist of blocks
+def load_whitelist(name):
+	with open(name, 'r') as whitelist_file:
+		whitelist = whitelist_file.read().splitlines()
+		
+	return whitelist
+
+# Function that loads the blacklist of blocks
+def load_blacklist(name):
+	with open(name, 'r') as blacklist_file:
+		blacklist = blacklist_file.read().splitlines()
+		
+	return blacklist
 
 # Function responsible for reading args
 def read_args():

@@ -26,7 +26,7 @@ To change the blocks or the .png selected available you will need to change it i
 
 ### v1.2.0
 * Improved algorithm speed
+* Added whitelist and blacklist files
 
 ## TODO
-* Whitelist & Blacklist of textures
 * GUI

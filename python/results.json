@@ -7830,10 +7830,10 @@
     "observer_back_on": 0.9798943014705882,
     "basalt_top": 0.9792394301470588,
     "smoker_front": 0.9788449754901961,
-    "bedrock": 0.9780867034313725,
     "cobbled_deepslate": 0.977389705882353,
     "deepslate_coal_ore": 0.9763059129901961,
-    "cauldron_side": 0.9762944240196079
+    "cauldron_side": 0.9762944240196079,
+    "polished_deepslate": 0.975390625
   },
   "(7,20)": {
     "acacia_log": 0.9945197610294118,
@@ -13668,7 +13668,6 @@
     "respawn_anchor_top_off": 0.9503102022058824
   },
   "(45,28)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -13677,7 +13676,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(46,28)": {
     "coal_block": 0.9782935049019608,
@@ -13776,7 +13776,6 @@
     "dried_kelp_side": 0.9619715073529411
   },
   "(54,28)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -13785,7 +13784,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(55,28)": {
     "coal_block": 0.9942555147058824,
@@ -15012,7 +15012,6 @@
     "respawn_anchor_top_off": 0.9561925551470588
   },
   "(45,30)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -15021,7 +15020,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(46,30)": {
     "dragon_egg": 0.9934053308823529,
@@ -15120,7 +15120,6 @@
     "red_nether_bricks": 0.9348039215686275
   },
   "(54,30)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -15129,7 +15128,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(55,30)": {
     "dragon_egg": 0.9903875612745098,
@@ -16650,10 +16650,10 @@
     "observer_back_on": 0.9798943014705882,
     "basalt_top": 0.9792394301470588,
     "smoker_front": 0.9788449754901961,
-    "bedrock": 0.9780867034313725,
     "cobbled_deepslate": 0.977389705882353,
     "deepslate_coal_ore": 0.9763059129901961,
-    "cauldron_side": 0.9762944240196079
+    "cauldron_side": 0.9762944240196079,
+    "polished_deepslate": 0.975390625
   },
   "(22,52)": {
     "soul_soil": 0.9917662377450981,
@@ -19920,7 +19920,6 @@
     "respawn_anchor_top_off": 0.9551968443627451
   },
   "(38,60)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -19929,7 +19928,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(39,60)": {
     "coal_block": 0.9910386029411765,
@@ -20004,7 +20004,6 @@
     "respawn_anchor_top_off": 0.9356043198529411
   },
   "(45,60)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -20013,7 +20012,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(46,60)": {
     "jigsaw_bottom": 0.9794921875,
@@ -20688,7 +20688,6 @@
     "red_nether_bricks": 0.9348039215686275
   },
   "(38,62)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -20697,7 +20696,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(39,62)": {
     "coal_block": 0.98515625,
@@ -20772,7 +20772,6 @@
     "chiseled_nether_bricks": 0.931039368872549
   },
   "(45,62)": {
-    "bedrock": 0.9967141544117647,
     "smoker_top": 0.9954197303921568,
     "basalt_top": 0.9919845281862745,
     "deepslate": 0.991030943627451,
@@ -20781,7 +20780,8 @@
     "polished_basalt_side": 0.9840341605392157,
     "cyan_terracotta": 0.9835975796568628,
     "cobbled_deepslate": 0.9834865196078432,
-    "structure_block_save": 0.9818895526960785
+    "structure_block_save": 0.9818895526960785,
+    "structure_block": 0.9798138786764706
   },
   "(46,62)": {
     "dragon_egg": 0.9934053308823529,
