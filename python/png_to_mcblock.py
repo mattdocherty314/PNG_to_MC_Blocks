@@ -18,29 +18,41 @@ def main():
 	
 	if (read_config in ["No", "NO", "no", "n", "N"]): # Go into prompting user for questions
 		print("Using argument values over prompting.")
-		if (args == None) or (args["-r"] == False): # If arg wasn't given
+		if ((args == None) or (args["-r"] == "")): # If arg wasn't given
 			reference_png_name = input("What is the image you want to copy (*'../Redstone Survivalist Skin.png')? ")
 			reference_png_name = valid_ref_png(reference_png_name)
 		else:
 			reference_png_name = valid_ref_png(args["-r"])
 
-		if (args == None) or (args["-b"] == False): # If arg wasn't given
+		if ((args == None) or (args["-b"] == "")): # If arg wasn't given
 			resource_pack_dir_path = input("What is the directory of block textures (*'../1-17-1_blocks/')? ")
 			resource_pack_dir_path = valid_dir_name(resource_pack_dir_path)
 		else:
 			resource_pack_dir_path = valid_dir_name(args["-b"])
 
-		if (args == None) or (args["-o"] == False): # If arg wasn't given
+		if ((args == None) or (args["-o"] == "")): # If arg wasn't given
 			results_filename = input("Where do you want to store the results (*'./results.json')? ")
 			results_filename = valid_res_json(results_filename)
 		else:
 			results_filename = valid_res_json(args["-o"])
 
-		if (args == None) or (args["-l"] == False): # If arg wasn't given
+		if ((args == None) or (args["-l"] == "")): # If arg wasn't given
 			top_n = input("How many of the top results do you want to store (*'10')? ")
 			top_n = valid_top_n(top_n)
 		else:
 			top_n = valid_top_n(args["-l"])
+		
+		if ((args == None) or (args["-w"] == "")): # If arg wasn't given
+			wl_name = input("What is the name of the whitelist file (*'whitelist.txt')? ")
+			wl_name = valid_whitelist_name(wl_name)
+		else:
+			wl_name = valid_whitelist_name(args["-w"])
+
+		if ((args == None) or (args["-k"] == "")): # If arg wasn't given
+			bl_name = input("What is the name of the blacklist file (*'blacklist.txt')? ")
+			bl_name = valid_blacklist_name(bl_name)
+		else:
+			bl_name = valid_blacklist_name(args["-k"])
 
 	else:
 		print("Reading configuration file. Using them over any arguments.")
@@ -49,9 +61,11 @@ def main():
 		resource_pack_dir_path = config['pack_dir_path']
 		results_filename = config['res_filename']
 		top_n = config['top_n_results']
+		bl_name = config['blacklist']
+		wl_name = config['whitelist']
 
-	whitelist = load_whitelist("whitelist.txt")
-	blacklist = load_blacklist("blacklist.txt")
+	blacklist = load_blacklist(bl_name)
+	whitelist = load_whitelist(wl_name)
 
 	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
 	blocks = get_block_list(resource_pack_dir_path)
@@ -185,32 +199,46 @@ def get_ref_data(ref_name):
 
 # Function to load the configuration from the config file
 def load_config(name="config.json"):
-	with open(name, 'r') as config_file:
-		config = json.load(config_file)
-	
-	return config
-
-# Function that loads the whitelist of blocks
-def load_whitelist(name):
-	with open(name, 'r') as whitelist_file:
-		whitelist = whitelist_file.read().splitlines()
+	try:
+		with open(name, 'r') as config_file:
+			config = json.load(config_file)
 		
-	return whitelist
+		return config
+	except FileNotFoundError:
+		print("Config file not found! Exiting...")
+		sys.exit(1)
 
 # Function that loads the blacklist of blocks
 def load_blacklist(name):
-	with open(name, 'r') as blacklist_file:
-		blacklist = blacklist_file.read().splitlines()
-		
-	return blacklist
+	try:
+		with open(name, 'r') as blacklist_file:
+			blacklist = blacklist_file.read().splitlines()
+			
+		return blacklist
+	except FileNotFoundError:
+		print("Blacklist file not found! Exiting...")
+		sys.exit(1)
+
+# Function that loads the whitelist of blocks
+def load_whitelist(name):
+	try:
+		with open(name, 'r') as whitelist_file:
+			whitelist = whitelist_file.read().splitlines()
+			
+		return whitelist
+	except FileNotFoundError:
+		print("Whitelist file not found! Exiting...")
+		sys.exit(1)
 
 # Function responsible for reading args
 def read_args():
 	args = {
-		'-r': False, # Reference PNG
-		'-b': False, # Texture Dir
-		'-o': False, # Output JSON
-		'-l': False, # Limit Output
+		'-r': "", # Reference PNG
+		'-b': "", # Texture Dir
+		'-o': "", # Output JSON
+		'-l': "", # Limit Output
+		'-w': "", # Whitelist
+		'-k': "", # Blacklist
 		'--config': False, # Use Config
 		'--prompt': False, # Prompt User
 	}
@@ -225,12 +253,14 @@ def read_args():
 		print("'-b <dir>'	= Texture Directory")
 		print("'-o <file>'	= Output JSON")
 		print("'-l <num>'	= Limit Output")
+		print("'-w <file>'	= Whitelist File")
+		print("'-k <file>'	= Blacklist File")
 		print("'--config'	= Use Configuration")
 		print("'--prompt'	= Prompt User")
 
 	else:
 		for i in range(1, len(sys.argv)):
-			if ((i+1 <= len(sys.argv)-1) and (sys.argv[i] in ['-r', '-b', '-o', '-l'])):
+			if ((i+1 <= len(sys.argv)-1) and (sys.argv[i] in ['-r', '-b', '-o', '-l', '-w', '-k'])):
 				args[sys.argv[i]] = sys.argv[i+1]
 			elif (sys.argv[i] in ['--config', '--prompt']):
 				args[sys.argv[i]] = True
@@ -257,6 +287,14 @@ def sort_results(results, limit_count):
 			save_results[res][res2] = new_results[res][res2] # limit the results
 
 	return save_results
+
+# Function that checks if the blacklist file is valid
+def valid_blacklist_name(name):
+	if (not name.endswith(".txt")):
+		print("Must end in '.txt'; Defaulting to './blacklist.txt'")
+		return "./blacklist.txt"
+	
+	return name
 
 # Function that checks if the directory name is valid
 def valid_dir_name(name):
@@ -289,6 +327,14 @@ def valid_top_n(name):
 		return 10
 	
 	return int(name)
+
+# Function that checks if the whitelist file is valid
+def valid_whitelist_name(name):
+	if (not name.endswith(".txt")):
+		print("Must end in '.txt'; Defaulting to './whitelist.txt'")
+		return "./whitelist.txt"
+	
+	return name
 
 
 

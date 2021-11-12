@@ -2,5 +2,7 @@
 	"ref_png_name": "../Redstone Survivalist Skin.png",
 	"pack_dir_path": "../1-17-1_blocks/",
 	"res_filename": "results.json",
-	"top_n_results": 10
+	"top_n_results": 10,
+	"blacklist": "blacklist.txt",
+	"whitelist": "whitelist.txt"
 }
