@@ -19,6 +19,8 @@ args = {
 	'--config': False, # Use Config
 	'--prompt': False, # Prompt User
 }
+root = tk.Tk()
+frm = ttk.Frame(root, padding=10)
 
 # Main function
 def main():
@@ -205,8 +207,7 @@ def get_ref_data(ref_name):
 
 # Function that loads the GUI
 def gui_main():
-	root = tk.Tk()
-	frm = ttk.Frame(root, padding=10)
+	global frm, root
 	root.title("PNG to MC Blocks Converter")
 	frm.grid()
 
@@ -214,24 +215,24 @@ def gui_main():
 	ttk.Label(frm, text="PNG to MC Blocks Converter", font=("Arial", 24)).grid(column=1, row=1, columnspan=5)
 
 	# Left Labels
-	left_labels = ["PNG File: ", "Block Dir: ", "Results File: "]
+	left_labels = ["PNG File: ", "Block Dir: ", "Results File: ", "Limit: "]
 	for idx, name in enumerate(left_labels):
 		ttk.Label(frm, text=name, font=("Arial", 16)).grid(column=1, row=idx+2, sticky='w')
 	
 	# Right Labels
-	right_labels = ["Limit: ", "Whitelist: ", "Blacklist: "]
+	right_labels = ["Whitelist: ", "Blacklist: "]
 	for idx, name in enumerate(right_labels):
 		ttk.Label(frm, text=name, font=("Arial", 16)).grid(column=4, row=idx+2, sticky='w')
 
 	# Buttons
 	search_button = tk.Button(frm, text="Search", font=("Arial", 16), command=run_program)
-	search_button.grid(column=5, row=6)
+	search_button.grid(column=4, row=5)
 	exit_button = tk.Button(frm, text="Exit", font=("Arial", 16), command=sys.exit)
-	exit_button.grid(column=5, row=7)
+	exit_button.grid(column=5, row=5)
 
 	# Inputs
 	png_button = tk.Button(frm, text="*.PNG", font=("Arial", 12))
-	png_button.grid(column=2, row=2)
+	png_button.grid(column=2, row=2, sticky='w')
 	png_button["command"] = partial(gui_select_update_text, png_button, "ref_png")
 
 	block_dir_button = tk.Button(frm, text=".*/", font=("Arial", 12))
@@ -243,15 +244,15 @@ def gui_main():
 	results_file_button["command"] = partial(gui_select_update_text, results_file_button, "res_file")
 
 	limit_button = tk.Button(frm, text="NUM", font=("Arial", 12))
-	limit_button.grid(column=5, row=2)
+	limit_button.grid(column=2, row=5)
 	limit_button["command"] = partial(gui_select_update_text, limit_button, "limit")
 
 	whitelist_button = tk.Button(frm, text="*.TXT", font=("Arial", 12))
-	whitelist_button.grid(column=5, row=3)
+	whitelist_button.grid(column=5, row=2)
 	whitelist_button["command"] = partial(gui_select_update_text, whitelist_button, "wl")
 
 	blacklist_button = tk.Button(frm, text="*.TXT", font=("Arial", 12))
-	blacklist_button.grid(column=5, row=4)
+	blacklist_button.grid(column=5, row=3)
 	blacklist_button["command"] = partial(gui_select_update_text, blacklist_button, "bl")
 
 	root.mainloop()
@@ -261,35 +262,39 @@ def gui_main():
 def gui_select_update_text(button, input_name):
 	global args
 
-	if (input_name == "ref_png"):
-		path = filedialog.askopenfilename()
-		button["text"] = path.split("/")[-1]
-		args["-r"] = path
+	try:
+		if (input_name == "ref_png"):
+			path = filedialog.askopenfilename()
+			button["text"] = path.split("/")[-1]
+			args["-r"] = path
 
-	elif (input_name == "res_file"):
-		path = filedialog.askopenfilename()
-		button["text"] = path.split("/")[-1]
-		args["-o"] = path
+		elif (input_name == "res_file"):
+			path = filedialog.askopenfilename()
+			button["text"] = path.split("/")[-1]
+			args["-o"] = path
 
-	elif (input_name == "wl"):
-		path = filedialog.askopenfilename()
-		button["text"] = path.split("/")[-1]
-		args["-w"] = path
+		elif (input_name == "wl"):
+			path = filedialog.askopenfilename()
+			button["text"] = path.split("/")[-1]
+			args["-w"] = path
 
-	elif (input_name == "bl"):
-		path = filedialog.askopenfilename()
-		button["text"] = path.split("/")[-1]
-		args["-k"] = path
+		elif (input_name == "bl"):
+			path = filedialog.askopenfilename()
+			button["text"] = path.split("/")[-1]
+			args["-k"] = path
 
-	elif (input_name == "block_dir"):
-		path = filedialog.askdirectory()
-		button["text"] = path.split("/")[-1]
-		args["-b"] = f"{path}/"
+		elif (input_name == "block_dir"):
+			path = filedialog.askdirectory()
+			button["text"] = path.split("/")[-1]
+			args["-b"] = f"{path}/"
 
-	elif (input_name == "limit"):
-		num = simpledialog.askinteger("Limit Results", "Limit the number of results: ")
-		button["text"] = num
-		args["-l"] = num
+		elif (input_name == "limit"):
+			num = simpledialog.askinteger("Limit Results", "Limit the number of results: ")
+			button["text"] = num
+			args["-l"] = num
+		
+	except AttributeError:
+		pass
 
 	
 # Function to load the configuration from the config file
@@ -355,6 +360,7 @@ def read_args():
 
 # Function to run the program
 def run_program(param=None):
+	status_label = None
 	if (param != None): # If passed from main function (rather than from gui)
 		reference_png_name = param[0]
 		resource_pack_dir_path = param[1]
@@ -363,6 +369,9 @@ def run_program(param=None):
 		bl_name = param[4]
 		wl_name = param[5]
 	else:
+		status_label = tk.Label(frm, text="Completed!", font=("Arial", 16))
+		status_label.grid(column=4, row=4, columnspan=2, sticky='w')
+
 		global args
 		reference_png_name = args['-r']
 		resource_pack_dir_path = args['-b']
