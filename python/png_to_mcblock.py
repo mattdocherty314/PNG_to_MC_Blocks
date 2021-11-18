@@ -1,16 +1,42 @@
+from functools import partial
 import json
 import os
 from PIL import Image
 import sys
 import time
+import tkinter as tk
+from tkinter import filedialog, simpledialog
+from tkinter import ttk
+import tkinter.font as font
+
+args = {
+	'-r': "", # Reference PNG
+	'-b': "", # Texture Dir
+	'-o': "", # Output JSON
+	'-l': "", # Limit Output
+	'-w': "", # Whitelist
+	'-k': "", # Blacklist
+	'--config': False, # Use Config
+	'--prompt': False, # Prompt User
+}
 
 # Main function
 def main():
-	args = read_args()
+	global args
+	default_args = {
+		'-r': "", # Reference PNG
+		'-b': "", # Texture Dir
+		'-o': "", # Output JSON
+		'-l': "", # Limit Output
+		'-w': "", # Whitelist
+		'-k': "", # Blacklist
+		'--config': False, # Use Config
+		'--prompt': False, # Prompt User
+	}
 	
 	read_config = "n"
-	if (args == None):
-		read_config = input("Would you like to read from the configuration file ([y]es*|[n]o)?")
+	if (args == default_args):
+		gui_main()
 	elif (args["--config"] == True):
 		read_config = "y"
 	elif (args["--prompt"] == True):
@@ -64,27 +90,7 @@ def main():
 		bl_name = config['blacklist']
 		wl_name = config['whitelist']
 
-	blacklist = load_blacklist(bl_name)
-	whitelist = load_whitelist(wl_name)
-
-	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
-	blocks = get_block_list(resource_pack_dir_path)
-	block_cols = find_block_colours(resource_pack_dir_path, blocks, whitelist, blacklist)
-
-	ref_count = 0
-	results = {}
-
-	for ref_pix in ref_rgb: # For every pixel
-		x = ref_count % ref_w # Get the X position
-		y = ref_count // ref_w # Get the Y position
-
-		list_matches = find_matches(block_cols, ref_pix, x, y)
-		results[f"({x},{y})"] = list_matches
-
-		ref_count += 1
-	
-	sort_res = sort_results(results, top_n)
-	save_results(results_filename, sort_res)
+	run_program([reference_png_name, resource_pack_dir_path, results_filename, top_n, bl_name, wl_name])
 
 # Function that saves the block colours to a dictionary
 def find_block_colours(block_dir, list_blocks, whitelist, blacklist):
@@ -197,6 +203,95 @@ def get_ref_data(ref_name):
 		print("No reference PNG found! Exiting...")
 		sys.exit(1)
 
+# Function that loads the GUI
+def gui_main():
+	root = tk.Tk()
+	frm = ttk.Frame(root, padding=10)
+	root.title("PNG to MC Blocks Converter")
+	frm.grid()
+
+	# Header
+	ttk.Label(frm, text="PNG to MC Blocks Converter", font=("Arial", 24)).grid(column=1, row=1, columnspan=5)
+
+	# Left Labels
+	left_labels = ["PNG File: ", "Block Dir: ", "Results File: "]
+	for idx, name in enumerate(left_labels):
+		ttk.Label(frm, text=name, font=("Arial", 16)).grid(column=1, row=idx+2, sticky='w')
+	
+	# Right Labels
+	right_labels = ["Limit: ", "Whitelist: ", "Blacklist: "]
+	for idx, name in enumerate(right_labels):
+		ttk.Label(frm, text=name, font=("Arial", 16)).grid(column=4, row=idx+2, sticky='w')
+
+	# Buttons
+	search_button = tk.Button(frm, text="Search", font=("Arial", 16), command=run_program)
+	search_button.grid(column=5, row=6)
+	exit_button = tk.Button(frm, text="Exit", font=("Arial", 16), command=sys.exit)
+	exit_button.grid(column=5, row=7)
+
+	# Inputs
+	png_button = tk.Button(frm, text="*.PNG", font=("Arial", 12))
+	png_button.grid(column=2, row=2)
+	png_button["command"] = partial(gui_select_update_text, png_button, "ref_png")
+
+	block_dir_button = tk.Button(frm, text=".*/", font=("Arial", 12))
+	block_dir_button.grid(column=2, row=3)
+	block_dir_button["command"] = partial(gui_select_update_text, block_dir_button, "block_dir")
+
+	results_file_button = tk.Button(frm, text="*.JSON", font=("Arial", 12))
+	results_file_button.grid(column=2, row=4)
+	results_file_button["command"] = partial(gui_select_update_text, results_file_button, "res_file")
+
+	limit_button = tk.Button(frm, text="NUM", font=("Arial", 12))
+	limit_button.grid(column=5, row=2)
+	limit_button["command"] = partial(gui_select_update_text, limit_button, "limit")
+
+	whitelist_button = tk.Button(frm, text="*.TXT", font=("Arial", 12))
+	whitelist_button.grid(column=5, row=3)
+	whitelist_button["command"] = partial(gui_select_update_text, whitelist_button, "wl")
+
+	blacklist_button = tk.Button(frm, text="*.TXT", font=("Arial", 12))
+	blacklist_button.grid(column=5, row=4)
+	blacklist_button["command"] = partial(gui_select_update_text, blacklist_button, "bl")
+
+	root.mainloop()
+	sys.exit()
+
+# Function that updates the GUI
+def gui_select_update_text(button, input_name):
+	global args
+
+	if (input_name == "ref_png"):
+		path = filedialog.askopenfilename()
+		button["text"] = path.split("/")[-1]
+		args["-r"] = path
+
+	elif (input_name == "res_file"):
+		path = filedialog.askopenfilename()
+		button["text"] = path.split("/")[-1]
+		args["-o"] = path
+
+	elif (input_name == "wl"):
+		path = filedialog.askopenfilename()
+		button["text"] = path.split("/")[-1]
+		args["-w"] = path
+
+	elif (input_name == "bl"):
+		path = filedialog.askopenfilename()
+		button["text"] = path.split("/")[-1]
+		args["-k"] = path
+
+	elif (input_name == "block_dir"):
+		path = filedialog.askdirectory()
+		button["text"] = path.split("/")[-1]
+		args["-b"] = f"{path}/"
+
+	elif (input_name == "limit"):
+		num = simpledialog.askinteger("Limit Results", "Limit the number of results: ")
+		button["text"] = num
+		args["-l"] = num
+
+	
 # Function to load the configuration from the config file
 def load_config(name="config.json"):
 	try:
@@ -232,16 +327,7 @@ def load_whitelist(name):
 
 # Function responsible for reading args
 def read_args():
-	args = {
-		'-r': "", # Reference PNG
-		'-b': "", # Texture Dir
-		'-o': "", # Output JSON
-		'-l': "", # Limit Output
-		'-w': "", # Whitelist
-		'-k': "", # Blacklist
-		'--config': False, # Use Config
-		'--prompt': False, # Prompt User
-	}
+	global args
 	if (len(sys.argv) == 1):
 		return None
 
@@ -266,6 +352,46 @@ def read_args():
 				args[sys.argv[i]] = True
 
 	return args
+
+# Function to run the program
+def run_program(param=None):
+	if (param != None): # If passed from main function (rather than from gui)
+		reference_png_name = param[0]
+		resource_pack_dir_path = param[1]
+		results_filename = param[2]
+		top_n = param[3]
+		bl_name = param[4]
+		wl_name = param[5]
+	else:
+		global args
+		reference_png_name = args['-r']
+		resource_pack_dir_path = args['-b']
+		results_filename = args['-o']
+		top_n = args['-l']
+		bl_name = args['-k']
+		wl_name = args['-w']
+
+	blacklist = load_blacklist(bl_name)
+	whitelist = load_whitelist(wl_name)
+
+	ref_rgb, ref_w, ref_h = get_ref_data(reference_png_name)
+	blocks = get_block_list(resource_pack_dir_path)
+	block_cols = find_block_colours(resource_pack_dir_path, blocks, whitelist, blacklist)
+
+	ref_count = 0
+	results = {}
+
+	for ref_pix in ref_rgb: # For every pixel
+		x = ref_count % ref_w # Get the X position
+		y = ref_count // ref_w # Get the Y position
+
+		list_matches = find_matches(block_cols, ref_pix, x, y)
+		results[f"({x},{y})"] = list_matches
+
+		ref_count += 1
+	
+	sort_res = sort_results(results, top_n)
+	save_results(results_filename, sort_res)
 
 # Function to save the results to a JSON file
 def save_results(name, results):
@@ -337,6 +463,7 @@ def valid_whitelist_name(name):
 	return name
 
 
-
 if __name__ == "__main__":
+	read_args()
+	
 	main()
